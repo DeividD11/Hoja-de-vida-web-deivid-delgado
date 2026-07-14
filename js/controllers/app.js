@@ -82,6 +82,45 @@ function getScrollTarget(sectionId) {
   return el ?? document.getElementById("contenido");
 }
 
+function getScrollOffset() {
+  const topbar = document.querySelector(".topbar");
+  const padding = 20;
+  const topbarHeight = topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 0;
+  return topbarHeight + padding;
+}
+
+function scrollToTarget(target, behavior = "smooth") {
+  if (!target) return;
+
+  const safeBehavior = reduceMotionQuery?.matches ? "auto" : behavior;
+  const measureTop = () => Math.max(0, window.scrollY + target.getBoundingClientRect().top - getScrollOffset());
+  const align = (scrollBehavior = safeBehavior) => {
+    window.scrollTo({ top: measureTop(), behavior: scrollBehavior });
+  };
+
+  const settleAndAlign = (frameCount = 0, lastTop = null, stableCount = 0) => {
+    const currentTop = measureTop();
+    const delta = lastTop === null ? Infinity : Math.abs(currentTop - lastTop);
+
+    if (delta < 1) {
+      stableCount += 1;
+    } else {
+      stableCount = 0;
+    }
+
+    align(frameCount === 0 ? safeBehavior : "auto");
+
+    if (safeBehavior === "auto") return;
+    if (stableCount >= 2 || frameCount >= 8) return;
+
+    window.requestAnimationFrame(() => settleAndAlign(frameCount + 1, currentTop, stableCount));
+  };
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => settleAndAlign());
+  });
+}
+
 function updateNavState(sectionId) {
   const links = Array.from(document.querySelectorAll(".nav-links a[data-route]"));
   links.forEach((link) => {
@@ -180,7 +219,11 @@ function setupRouting() {
       if (!sectionId || !target) return;
       event.preventDefault();
       setRouteState(sectionId, { push: true, animate: true });
-      target.scrollIntoView({ behavior: reduceMotionQuery?.matches ? "auto" : "smooth", block: "start" });
+      if (document.fonts?.ready) {
+        document.fonts.ready.finally(() => scrollToTarget(target, "smooth"));
+      } else {
+        scrollToTarget(target, "smooth");
+      }
     });
   });
 
@@ -189,7 +232,11 @@ function setupRouting() {
     const target = getScrollTarget(sectionId);
     setRouteState(sectionId, { push: false, animate: true });
     if (target) {
-      target.scrollIntoView({ behavior: "auto", block: "start" });
+      if (document.fonts?.ready) {
+        document.fonts.ready.finally(() => scrollToTarget(target, "auto"));
+      } else {
+        scrollToTarget(target, "auto");
+      }
     }
   });
 
@@ -362,6 +409,7 @@ function buildApp() {
 
   setupRouting();
   setupPrintMotionControl();
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   setupRevealAnimations();
   setupTitleAndFaviconAnimation();
   document.addEventListener("visibilitychange", () => {
@@ -381,6 +429,24 @@ function buildApp() {
   if (form) {
     form.addEventListener("submit", handleSubmit);
     form.addEventListener("reset", () => setStatus("", ""));
+
+    const sendBtn = document.getElementById("contactSendBtn");
+    const resetBtn = document.getElementById("contactResetBtn");
+
+    if (sendBtn) {
+      sendBtn.addEventListener("click", () => {
+        processContactForm(form);
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        form.reset();
+        setStatus("", "");
+        const firstInput = form.querySelector("input, textarea");
+        firstInput?.focus();
+      });
+    }
   }
 }
 
@@ -430,21 +496,16 @@ function openWhatsAppChat(message) {
   const phoneNumber = "573229266368";
   const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
-  const popup = window.open(url, "_blank", "noopener,noreferrer");
-  if (!popup) {
-    window.location.href = url;
-  }
+  window.location.href = url;
 }
 
-async function handleSubmit(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
+function processContactForm(form) {
   const formData = new FormData(form);
 
   const validationError = validateForm(formData);
   if (validationError) {
     setStatus(validationError, "error");
-    return;
+    return false;
   }
 
   const payload = {
@@ -453,15 +514,23 @@ async function handleSubmit(event) {
     message: String(formData.get("message")).trim(),
   };
 
+  setStatus("Preparando tu mensaje en WhatsApp...", "");
+  const whatsappMessage = buildWhatsAppMessage(payload);
+  openWhatsAppChat(whatsappMessage);
+  form.reset();
+  setStatus("Mensaje preparado correctamente en WhatsApp.", "success");
+  return true;
+}
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+
   try {
-    setStatus("Preparando tu mensaje en WhatsApp...", "");
-    const whatsappMessage = buildWhatsAppMessage(payload);
-    openWhatsAppChat(whatsappMessage);
-    form.reset();
-    setStatus("Mensaje preparado correctamente en WhatsApp.", "success");
+    processContactForm(form);
   } catch (error) {
     console.error("WhatsApp submit error:", error);
-    setStatus("No fue posible abrir WhatsApp. Verifica que el navegador permita abrir ventanas nuevas.", "error");
+    setStatus("No fue posible abrir WhatsApp. Verifica tu conexión o intenta de nuevo.", "error");
   }
 }
 

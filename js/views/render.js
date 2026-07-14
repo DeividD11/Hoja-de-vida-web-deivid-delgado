@@ -298,8 +298,8 @@ export function renderContact(container, cv) {
       <textarea id="contactMessage" name="message" minlength="10" maxlength="1000" placeholder="Escribe aquí tu solicitud, propuesta o consulta..." required></textarea>
     </div>
     <div class="hero-actions">
-      <button class="btn btn-primary" type="submit">Enviar por WhatsApp</button>
-      <button class="btn btn-secondary" type="reset">Limpiar</button>
+      <button class="btn btn-primary" type="button" id="contactSendBtn">Enviar por WhatsApp</button>
+      <button class="btn btn-secondary" type="button" id="contactResetBtn">Limpiar</button>
     </div>
     <p id="formStatus" class="form-status" aria-live="polite"></p>
   `;
