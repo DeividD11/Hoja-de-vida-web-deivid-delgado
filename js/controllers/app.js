@@ -47,6 +47,7 @@ function getBasePath() {
 }
 
 const BASE_PATH = getBasePath();
+const EXPORT_MODE = new URLSearchParams(window.location.search).get("export") === "1";
 
 function normalizePath(pathname = window.location.pathname) {
   const clean = pathname.replace(/\/+$/, "");
@@ -394,6 +395,12 @@ function isInAppBrowser() {
   return /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram/i.test(ua);
 }
 
+function getExportModeUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("export", "1");
+  return url.toString();
+}
+
 function buildExportDocument() {
   const clone = document.documentElement.cloneNode(true);
 
@@ -472,6 +479,11 @@ async function handleExportAction() {
     return;
   }
 
+  if (isInAppBrowser()) {
+    window.location.assign(getExportModeUrl());
+    return;
+  }
+
   const opened = openExportPreview();
   if (opened) return;
 
@@ -488,12 +500,21 @@ async function handleExportAction() {
     }
   }
 
-  downloadExportFile();
+  window.location.assign(getExportModeUrl());
+}
+
+function setupExportMode() {
+  if (!EXPORT_MODE) return;
+
+  document.documentElement.classList.add("export-preview");
+  document.body.dataset.exportMode = "true";
+  setMotionMode(true);
 }
 
 function buildApp() {
   setupBackToTop();
   setHeaderInfo();
+  setupExportMode();
 
   renderStats(document.getElementById("resumen"), cvData);
   renderProfile(document.getElementById("perfil"), cvData);
@@ -551,6 +572,17 @@ function buildApp() {
         firstInput?.focus();
       });
     }
+  }
+
+  if (EXPORT_MODE && !isInAppBrowser() && typeof window.print === "function") {
+    const ready = document.fonts?.ready ?? Promise.resolve();
+    ready.finally(() => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          window.print();
+        });
+      });
+    });
   }
 }
 

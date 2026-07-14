@@ -687,7 +687,7 @@ main > section[data-reveal] {
 }
 
 @media (pointer: coarse), (max-width: 768px) {
-  html { scroll-behavior: auto; }
+  html { scroll-behavior: smooth; }
 
   .topbar,
   .hero-copy,
@@ -701,12 +701,12 @@ main > section[data-reveal] {
   .nav-links a,
   .btn,
   .back-to-top {
-    transition-duration: .12s;
+    transition-duration: .18s;
   }
 
   [data-reveal] {
-    transition-duration: .16s;
-    transition-timing-function: ease-out;
+    transition-duration: .22s;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
     transition-delay: var(--reveal-delay, 0ms);
   }
 }
@@ -743,6 +743,139 @@ main > section[data-reveal] {
   .definition-list { grid-template-columns: 1fr; }
 }
 
+
+body[data-export-mode="true"],
+.export-preview body {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  scroll-behavior: auto !important;
+}
+
+body[data-export-mode="true"] *,
+body[data-export-mode="true"] *::before,
+body[data-export-mode="true"] *::after,
+.export-preview body *,
+.export-preview body *::before,
+.export-preview body *::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+body[data-export-mode="true"] [data-reveal],
+.export-preview [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
+
+body[data-export-mode="true"] .skip-link,
+body[data-export-mode="true"] .topbar,
+body[data-export-mode="true"] .hero-actions,
+body[data-export-mode="true"] .footer,
+body[data-export-mode="true"] .back-to-top,
+.export-preview .skip-link,
+.export-preview .topbar,
+.export-preview .hero-actions,
+.export-preview .footer,
+.export-preview .back-to-top {
+  display: none !important;
+}
+
+body[data-export-mode="true"] .hero,
+body[data-export-mode="true"] .page-shell,
+.export-preview .hero,
+.export-preview .page-shell {
+  padding: 0 !important;
+}
+
+body[data-export-mode="true"] .hero-grid,
+.export-preview .hero-grid {
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+body[data-export-mode="true"] .hero-copy,
+body[data-export-mode="true"] .hero-panel,
+body[data-export-mode="true"] .content-card,
+body[data-export-mode="true"] .stats-card,
+body[data-export-mode="true"] .contact-card,
+.export-preview .hero-copy,
+.export-preview .hero-panel,
+.export-preview .content-card,
+.export-preview .stats-card,
+.export-preview .contact-card {
+  background: #ffffff !important;
+  border: 1px solid #dfe6ee !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+body[data-export-mode="true"] .hero-copy,
+.export-preview .hero-copy {
+  padding: 22px !important;
+}
+
+body[data-export-mode="true"] .hero-panel,
+.export-preview .hero-panel {
+  padding: 22px !important;
+  width: 100% !important;
+}
+
+body[data-export-mode="true"] .hero-copy h1,
+.export-preview .hero-copy h1 {
+  font-size: 2.25rem !important;
+}
+
+body[data-export-mode="true"] .lead,
+body[data-export-mode="true"] .summary,
+.export-preview .lead,
+.export-preview .summary {
+  color: #334155 !important;
+  max-width: none !important;
+}
+
+body[data-export-mode="true"] .panel-item,
+.export-preview .panel-item {
+  background: #f8fafc !important;
+  border: 1px solid #dfe6ee !important;
+}
+
+body[data-export-mode="true"] .content-card,
+body[data-export-mode="true"] .stats-card,
+.export-preview .content-card,
+.export-preview .stats-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+body[data-export-mode="true"] .hero-copy[data-reveal],
+body[data-export-mode="true"] .hero-panel[data-reveal],
+body[data-export-mode="true"] main > section[data-reveal],
+body[data-export-mode="true"] .content-card[data-reveal],
+body[data-export-mode="true"] .stats-card[data-reveal],
+body[data-export-mode="true"] .card[data-reveal],
+body[data-export-mode="true"] .panel-item[data-reveal],
+body[data-export-mode="true"] .definition-item[data-reveal],
+body[data-export-mode="true"] .timeline-item[data-reveal],
+body[data-export-mode="true"] .skill-chip[data-reveal],
+.export-preview .hero-copy[data-reveal],
+.export-preview .hero-panel[data-reveal],
+.export-preview main > section[data-reveal],
+.export-preview .content-card[data-reveal],
+.export-preview .stats-card[data-reveal],
+.export-preview .card[data-reveal],
+.export-preview .panel-item[data-reveal],
+.export-preview .definition-item[data-reveal],
+.export-preview .timeline-item[data-reveal],
+.export-preview .skill-chip[data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @media (max-width: 640px) {
   .hero, .page-shell { padding-left: 14px; padding-right: 14px; }
   .hero-copy h1 { font-size: 2rem; }
@@ -761,7 +894,7 @@ main > section[data-reveal] {
 
 /* Print-friendly */
 @media print {
-  @page { margin: 12mm; }
+  @page { size: A4 portrait; margin: 10mm 12mm; }
   html, body {
     background: #ffffff !important;
     color: #0f172a !important;
@@ -782,15 +915,22 @@ main > section[data-reveal] {
   .skip-link, .topbar, .hero-actions, #contacto, .footer, .back-to-top {
     display: none !important;
   }
-  .hero, .page-shell { padding: 0; }
-  .hero-copy, .hero-panel, .content-card, .stats-card {
-    box-shadow: none;
-    border: 1px solid #dfe6ee;
-    background: #ffffff !important;
+  .hero, .page-shell { padding: 0 !important; }
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
-  .hero-grid { grid-template-columns: 1.4fr 0.9fr; }
+  .hero-copy, .hero-panel, .content-card, .stats-card, .contact-card {
+    box-shadow: none !important;
+    border: 1px solid #dfe6ee !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+  .hero-copy { padding: 22px !important; }
+  .hero-panel { padding: 22px !important; width: 100% !important; }
   .content-card, .stats-card, .timeline-item, .definition-item, .card, .panel-item {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
   .content-card { page-break-inside: avoid; }
   .section-head h2 { font-size: 1.35rem; }
