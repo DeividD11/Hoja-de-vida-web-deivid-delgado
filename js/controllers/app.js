@@ -389,6 +389,108 @@ function setupPrintMotionControl() {
   }
 }
 
+function isInAppBrowser() {
+  const ua = navigator.userAgent || "";
+  return /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram/i.test(ua);
+}
+
+function buildExportDocument() {
+  const clone = document.documentElement.cloneNode(true);
+
+  clone.querySelectorAll("script").forEach((script) => script.remove());
+  clone.querySelectorAll("[data-export-hidden='true']").forEach((node) => node.remove());
+
+  clone.querySelectorAll('link[href]').forEach((link) => {
+    const rel = (link.getAttribute("rel") || "").toLowerCase();
+    if (rel.includes("stylesheet") || rel.includes("icon")) {
+      const absoluteHref = new URL(link.getAttribute("href"), window.location.href).href;
+      link.setAttribute("href", absoluteHref);
+    }
+  });
+
+  const htmlClass = clone.getAttribute("class") || "";
+  const mergedClasses = new Set(htmlClass.split(/\s+/).filter(Boolean));
+  mergedClasses.add("export-preview");
+  clone.setAttribute("class", Array.from(mergedClasses).join(" "));
+
+  const title = document.title || APP_NAME;
+  const body = clone.querySelector("body");
+  if (body) {
+    body.setAttribute("data-export-mode", "true");
+  }
+
+  return `<!doctype html>\n${clone.outerHTML}`.replace(
+    /<title>.*?<\/title>/i,
+    `<title>${title}</title>`
+  );
+}
+
+function openExportPreview() {
+  const exportHtml = buildExportDocument();
+  const blob = new Blob([exportHtml], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const features = "noopener,noreferrer";
+  const preview = window.open(url, "_blank", features);
+
+  if (preview) {
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return true;
+  }
+
+  URL.revokeObjectURL(url);
+  return false;
+}
+
+function downloadExportFile() {
+  const exportHtml = buildExportDocument();
+  const blob = new Blob([exportHtml], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const safeTitle = (document.title || "hoja-de-vida").replace(/[^\w.-]+/g, "-");
+  const fileName = `${safeTitle}.html`;
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function handleExportAction() {
+  const canNativePrint = typeof window.print === "function" && !isInAppBrowser();
+
+  if (canNativePrint) {
+    setMotionMode(true);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+    return;
+  }
+
+  const opened = openExportPreview();
+  if (opened) return;
+
+  if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "")) {
+    try {
+      await navigator.share({
+        title: document.title || APP_NAME,
+        text: "Abre esta hoja de vida en el navegador para imprimir o exportar.",
+        url: window.location.href,
+      });
+      return;
+    } catch (error) {
+      // Continue to file download fallback.
+    }
+  }
+
+  downloadExportFile();
+}
+
 function buildApp() {
   setupBackToTop();
   setHeaderInfo();
@@ -423,7 +525,9 @@ function buildApp() {
 
   const printBtn = document.getElementById("printBtn");
   if (printBtn) {
-    printBtn.addEventListener("click", () => window.print());
+    printBtn.addEventListener("click", () => {
+      void handleExportAction();
+    });
   }
 
   if (form) {

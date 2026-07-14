@@ -25,13 +25,15 @@ Este sitio busca convertir un currículum tradicional en una presentación web c
 
 ## Qué incluye la aplicación
 
+- Si el navegador interno bloquea la impresión, el botón abre una vista exportable o descarga un HTML listo para imprimir.
+
 - encabezado principal con resumen profesional;
 - navegación por secciones con URLs limpias;
 - título de página dinámico según la sección visible;
 - favicon animado de forma sutil;
 - tarjetas informativas con datos resumidos;
 - secciones de perfil, datos personales, formación, cursos, experiencia, habilidades, referencias y contacto;
-- botón de impresión / exportación;
+- botón de impresión / exportación con respaldo para navegadores internos como Facebook en celular;
 - botón de retorno al inicio;
 - preparación específica para impresión sin animaciones pesadas;
 - diseño adaptable a móvil, tablet y escritorio.
