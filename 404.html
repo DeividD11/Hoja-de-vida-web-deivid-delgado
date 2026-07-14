@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Redirigiendo…</title>
+  <script>
+    (function () {
+      var path = window.location.pathname.replace(/\/+$/, '');
+      var parts = path.split('/').filter(Boolean);
+      var base = parts.length > 1 ? '/' + parts[0] : '';
+      var relative = base ? path.slice(base.length).replace(/^\/+/, '') : path.replace(/^\/+/, '');
+      if (relative) {
+        window.sessionStorage.setItem('gh-pages-route', relative);
+      }
+      window.location.replace(base ? base + '/' : '/');
+    })();
+  </script>
+</head>
+<body></body>
+</html>
