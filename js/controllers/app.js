@@ -392,7 +392,16 @@ function setupPrintMotionControl() {
 
 function isInAppBrowser() {
   const ua = navigator.userAgent || "";
-  return /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram/i.test(ua);
+  return /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram|LinkedInApp|Snapchat|Twitter|XApp|WhatsApp|Telegram/i.test(ua);
+}
+
+function applyBrowserModeFlags() {
+  const inAppBrowser = isInAppBrowser();
+  document.documentElement.classList.toggle("in-app-browser", inAppBrowser);
+  if (document.body) {
+    document.body.classList.toggle("in-app-browser", inAppBrowser);
+  }
+  return inAppBrowser;
 }
 
 function getExportModeUrl() {
@@ -514,6 +523,7 @@ function setupExportMode() {
 function buildApp() {
   setupBackToTop();
   setHeaderInfo();
+  applyBrowserModeFlags();
   setupExportMode();
 
   renderStats(document.getElementById("resumen"), cvData);

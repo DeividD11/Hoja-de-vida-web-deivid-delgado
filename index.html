@@ -16,6 +16,13 @@
       var parts = path.split('/').filter(Boolean);
       var base = parts.length ? '/' + parts[0] : '';
       var assets = base ? base + '/assets' : './assets';
+      var ua = navigator.userAgent || '';
+      var inAppBrowser = /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram|LinkedInApp|Snapchat|Twitter|XApp|WhatsApp|Telegram/i.test(ua);
+
+      if (inAppBrowser) {
+        document.documentElement.classList.add('in-app-browser');
+      }
+
       var el = document.getElementById('appFavicon');
       if (el) {
         el.href = assets + '/favicon-32.png';
