@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Hoja de vida web profesional de Deivid Aldemar Delgado Naranjo" />
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#10192c" />
   <title>Inicio · Deivid Aldemar Delgado Naranjo</title>
   <link id="appFavicon" rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png" />
@@ -20,7 +20,20 @@
       var inAppBrowser = /FBAN|FBAV|FB_IAB|FB4A|Messenger|Instagram|LinkedInApp|Snapchat|Twitter|XApp|WhatsApp|Telegram/i.test(ua);
 
       if (inAppBrowser) {
-        document.documentElement.classList.add('in-app-browser');
+        var root = document.documentElement;
+        root.classList.add('in-app-browser');
+        root.style.backgroundColor = '#f5f7fb';
+        root.style.colorScheme = 'light';
+
+        var themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+          themeMeta.setAttribute('content', '#f5f7fb');
+        }
+
+        var colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+        if (colorSchemeMeta) {
+          colorSchemeMeta.setAttribute('content', 'light');
+        }
       }
 
       var el = document.getElementById('appFavicon');
